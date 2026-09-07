@@ -1,4 +1,55 @@
-# Image Cropper
+# flutter_image_cropper_custom
+
+[`hnvn/flutter_image_cropper`](https://github.com/hnvn/flutter_image_cropper) **9.1.0** 의 포크입니다.
+여행 앱 [여행하게](https://github.com/kiwijuse/yeohaenghage)의 프로필 사진 등록 화면에서 필요했던 것 하나를 넣었습니다.
+
+원본 대비 바뀐 파일은 하나입니다 — `android/src/main/java/vn/hunghd/flutter/plugins/imagecropper/ImageCropperDelegate.java`.
+
+## 크롭 화면 상단이 안 보이던 문제
+
+크롭 화면 배경을 검게 맞춰 뒀는데 **상단 시계와 배터리가 보이지 않았습니다.**
+
+원인은 이렇습니다. 9.0.0에서 이 플러그인은 화면 가장자리 처리 방식을 바꾸면서 관련 코드를 플러그인 밖으로 내보냈고, 그 과정에서 Dart 쪽 `AndroidUiSettings`에 상태바 색을 넘기는 항목이 사라졌습니다. 그런데 네이티브 코드는 여전히 `android.statusbar_color` 를 읽고 있습니다. 값이 안 넘어오면 투명으로 칠하고, 안드로이드 12 이상에서는 상태바 글자를 어두운 색으로 바꿉니다.
+
+검은 배경 + 투명 상태바 + 어두운 글자. 안 보이는 게 당연했습니다.
+
+Dart에서 넘길 방법이 없으니 네이티브에서 기본값을 세 줄 넣었습니다.
+
+```java
+UCrop.Options options = new UCrop.Options();
+options.setStatusBarColor(Color.BLACK);
+options.setToolbarColor(Color.BLACK);
+options.setToolbarWidgetColor(Color.WHITE);
+```
+
+Dart에서 넘어온 설정을 적용하기 **전에** 두었습니다. 앱이 다른 색을 넘기면 그쪽이 이깁니다. 기본값만 바꾸고 길은 막지 않았습니다.
+
+## 쓰는 법
+
+```yaml
+dependencies:
+  image_cropper:
+    git:
+      url: https://github.com/kiwijuse/flutter_image_cropper_custom.git
+```
+
+패키지 이름과 공개 API는 원본과 같습니다.
+
+## 알아둘 것
+
+깃 주소로 가져오는 순간 **원본 업데이트가 자동으로 오지 않습니다.** 세 줄을 고치려고 패키지 하나를 통째로 떠안는 셈이라, 같은 상황이라면 크롭 화면을 직접 만드는 쪽도 함께 재 보시길 권합니다.
+
+원본 문서는 아래에 그대로 두었습니다. 라이선스도 원본([BSD 3-Clause](LICENSE))을 따릅니다.
+
+만들면서 어떤 순서로 원인을 찾았는지는 [여행하게 회고 — 포크한 라이브러리](https://github.com/kiwijuse/yeohaenghage/blob/main/docs/09-forked-libraries.md)에 적어 뒀습니다.
+
+---
+
+<br>
+
+# 원본 문서 · Upstream README
+
+## Image Cropper
 
 [![pub package](https://img.shields.io/pub/v/image_cropper.svg)](https://pub.dartlang.org/packages/image_cropper)
 
